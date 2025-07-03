@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Welcome</h1>
+    <h1>Welcome {{ currentUser }}</h1>
     <h2>Dashboard</h2>
+    <a href = "auth/signout">Sign Out</a>
 {% endblock %}
