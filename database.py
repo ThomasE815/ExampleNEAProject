@@ -1,4 +1,5 @@
 import sqlite3 as sql 
+from werkzeug.security import generate_password_hash , check_password_hash
 
 class DatabaseHandler:
     def __init__(self, dbName = "appData.db"):
@@ -15,10 +16,21 @@ class DatabaseHandler:
                          password TEXT NOT NULL CHECK(length(password) > 7)
                          )""")
             
+        conn.execute("""CREATE TABLE IF NOT EXISTS tasks (
+                     taskID INTEGER PRIMARY KEY AUTOINCREMENT,
+                     userID INTEGER NOT NULL,
+                     taskName TEXT NOT NULL CHECK(length(taskName) > 2),
+                     taskDescription TEXT NOT NULL,
+                     status TEXT DEFAULT "incomplete" CHECK(status IN ("incomplete", "complete")),
+                     created TEXT DEFAULT CURRENT_TIMESTAMP,
+                     FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
+                     )""")
+            
     def createUser(self, username, password):
         try:
+            hashed_password = generate_password_hash(password)
             with self.connect() as conn:
-                conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+                conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
                 conn.commit()
                 return True, None
         except sql.IntegrityError as error:
@@ -33,13 +45,21 @@ class DatabaseHandler:
     def authoriseUser(self, username, password):
         try:
             with self.connect() as conn:
-                results = conn.execute("SELECT userID FROM users WHERE username = ? AND password = ?", (username, password))
-                userDetails = results.fetchone()
-                if userDetails != None:
-                    return True
-                
-                return False
-
-
+                results = conn.execute("SELECT password FROM users WHERE username = ? ", (username, ))
+                stored_hash = results.fetchone()[0]
+                return check_password_hash(stored_hash, password)  
         except:
             return False
+
+    def createTask(self, taskName, description, userID):
+        try:
+            with self.connect as conn:
+                conn.execute("""INSERT INTO tasks 
+                             (taskName, description, userID)
+                             VALUES 
+                             (?,?,?)""", (taskName, description, userID))
+                conn.commit()
+            return True, None
+        except:
+            return False,"unkwown-error"
+        ## video 3- start

@@ -3,7 +3,7 @@ from scripts.isAuthorised import isAuthorised
 from database import DatabaseHandler
 from blueprints.pages import pages
 from blueprints.auth import auth
-
+#Change this key as it is bad
 SECRET_KEY = "thisisabadsecret"
 
 app = Flask(__name__)
