@@ -11,9 +11,10 @@ def authoriseUser():
     password = formDetails.get("password")
 
     db = DatabaseHandler()
-    success = db.authoriseUser(username, password)
+    success, userID = db.authoriseUser(username, password)
     if success:
         session["currentUser"] = username
+        session["userID"] = userID
         return redirect(url_for("pages.dashboard"))
     
     return redirect(url_for("pages.signin"))

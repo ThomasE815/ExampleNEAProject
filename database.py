@@ -43,23 +43,60 @@ class DatabaseHandler:
             return False, "unknown-error"
         
     def authoriseUser(self, username, password):
+
         try:
             with self.connect() as conn:
-                results = conn.execute("SELECT password FROM users WHERE username = ? ", (username, ))
-                stored_hash = results.fetchone()[0]
-                return check_password_hash(stored_hash, password)  
+                results = conn.execute("SELECT password, userID FROM users WHERE username = ?", (username, ))
+                stored_hash, userID = results.fetchone()
+                if check_password_hash(stored_hash, password):
+                    return True, userID
+                else:
+                    return False, None
         except:
-            return False
+            return False, None
 
     def createTask(self, taskName, description, userID):
         try:
-            with self.connect as conn:
+            with self.connect() as conn:
                 conn.execute("""INSERT INTO tasks 
-                             (taskName, description, userID)
+                             (taskName, taskDescription, userID)
                              VALUES 
                              (?,?,?)""", (taskName, description, userID))
                 conn.commit()
             return True, None
+        except Exception as error:
+            print(error)
+            return False, "unkwown-error"
+        
+    def fetchAllTasks(self, userID):
+        try:
+            with self.connect() as conn:
+                results = conn.execute("""SELECT taskID, taskName, taskDescription, status, created
+                                FROM tasks
+                                WHERE userID = ?""", (userID, ))
+                tasks = results.fetchall()
+                if len(tasks) > 0:
+                    return True, tasks
+                
+                return True, None
         except:
-            return False,"unkwown-error"
-        ## video 3- start
+            return False, None 
+    
+    def deleteTask(self, taskID, userID):
+        try:
+            with self.connect() as conn:
+                conn.execute("DELETE FROM tasks WHERE taskID = ? AND userID = ?", (taskID, userID))
+                conn.commit()
+                return True 
+        except:
+            return False
+        
+    def updateStatus(self, taskID, userID, newStatus):
+        try:
+            with self.connect() as conn:
+                conn.execute("UPDATE tasks SET status = ? WHERE taskID = ? AND userID = ?;", (newStatus, taskID, userID))
+                conn.commit()
+                return True
+        except Exception as error:
+            print(error)
+            return False

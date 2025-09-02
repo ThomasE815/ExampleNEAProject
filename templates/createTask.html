@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+To Do App - Create New Task
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1>todo.</h1>
+    <h2>Create New Task</h2>
+    <form action = "/tasks/create" method="post">
+        <div>
+            <label for="taskName">Task Name:</label>
+            <input name="taskName" id="taskName" type="text" required minlength = "3"/>
+        </div>
+
+        <div>
+            <label for="description">Description:</label>
+            <input name="description" id="description" type="text" required>
+        </div>
+
+
+        <div>
+            <input type="submit" value="Create Task" />
+        </div>
+    </form>
+
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+
+    <p><a href="/dashboard">Back to Dashboard</a></p>
+</div>
+
+{% endblock %}

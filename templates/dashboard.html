@@ -8,4 +8,44 @@
     <h1>Welcome {{ currentUser }}</h1>
     <h2>Dashboard</h2>
     <a href = "auth/signout">Sign Out</a>
+    <a href = "/createTask">Create New Task</a>
+
+    {% for message in messages %}
+        <p> {{ message }} </p>
+    {% endfor %}
+
+    {% if not tasks %}
+        <p>No Tasks Set - You're all good!</p>
+
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Task Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task[1] }}</td>
+                        <td>{{ task[2] }}</td>
+                        <td>
+                            <form action = {{ "/tasks/updateStatus/" + task[0]|string }} method = "post">
+                                <input type = "hidden" value = {{ task[3] }} name = "status">
+                                <input type = "submit" value = {{ task[3] }}>
+                            </form>
+                        </td>
+                        <td>
+                            <form action = {{ "/tasks/delete/" + task[0]|string }} method = "post">
+                                <input type = "submit" value = "delete">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
 {% endblock %}

@@ -1,4 +1,5 @@
 from flask import Blueprint, get_flashed_messages, redirect, render_template, session, url_for
+from database import DatabaseHandler
 from scripts.isAuthorised import isAuthorised
 
 pages = Blueprint("pages", __name__)
@@ -16,9 +17,22 @@ def dashboard():
         return redirect(url_for("pages.signin"))
     
     currentUser = session["currentUser"]
-    return render_template("dashboard.html", currentUser = currentUser)
+    userID = session["userID"]
+
+    db = DatabaseHandler()
+    success, tasks = db.fetchAllTasks(userID)
+
+    messages = get_flashed_messages()
+
+    return render_template("dashboard.html", currentUser = currentUser, tasks = tasks, messages = messages)
 
 @pages.route("/signup")
 def signup():
     messages = get_flashed_messages()
     return render_template("signup.html", messages = messages)
+
+
+@pages.route("/createTask")
+def createTask():
+    messages = get_flashed_messages()
+    return render_template("createTask.html", messages = messages)
